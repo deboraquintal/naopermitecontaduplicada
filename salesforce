@@ -1,0 +1,30 @@
+    trigger checkDuplicationAcc on Account (before insert, before update, before delete) {
+    if(trigger.isBefore){
+        system.debug('trigger before trigger'); 
+        
+        if(trigger.isInsert){
+            set<String> accDoc=new set<String>();
+            for(Account a:Trigger.new){
+                accDoc.add(a.Numero_Documento__c);
+                System.debug('The number of doc is ' +accDoc);
+                
+            }
+            set<String> docAccData=new set<String>();
+            for(Account a:[select Id,Name,Numero_Documento__c from Account where Numero_Documento__c in:accDoc]){
+                docAccData.add(a.Numero_Documento__c);
+                
+            }
+            for(Account a:Trigger.new){
+                if(docAccData.contains(a.Numero_Documento__c)){
+                    a.addError('Do not allow insert duplicate document number');
+                }
+            }
+        }
+    }
+    
+    else if(trigger.isAfter){
+        system.debug('trigger after trigger');        
+    }
+    
+    
+}
